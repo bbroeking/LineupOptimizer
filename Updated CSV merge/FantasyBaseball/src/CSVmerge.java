@@ -14,7 +14,7 @@ public class CSVmerge {
 		// TODO Auto-generated method stub
 		
 		// Daily Salary 
-		String filename = "5.2Salary.csv";
+		String filename = "5.6Salary.csv";
 
 		File file = new File(filename);
 
@@ -52,7 +52,7 @@ public class CSVmerge {
 		}
 
 		// create leaderboardplayer objects from leaderboardCSV
-		filename = "5.2Batter.csv";
+		filename = "5.6Batter.csv";
 
 		File file2 = new File(filename);
 		try {
@@ -95,7 +95,7 @@ public class CSVmerge {
 		}
 
 		// create leaderboardpitcher objects from leaderboardpitcherCSV
-		filename = "5.2Pitcher.csv";
+		filename = "5.6Pitcher.csv";
 
 		File file3 = new File(filename);
 		try {

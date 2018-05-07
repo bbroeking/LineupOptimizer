@@ -1,0 +1,95 @@
+#[P, P, C, 1B, 2B, 3B, SS, OF, OF, OF]
+
+using JuMP, Cbc, NamedArrays
+
+raw = readcsv("output.csv");
+
+names = raw[:,1];
+salaries = raw[:,2];
+position = raw[:, 3];
+projectedPoints = raw[:,4];
+n = length(names)
+
+# total salary
+salary_cap = 50000
+
+#number of players at each position
+no_pitchers = 2
+no_catchers = 1
+no_first = 1
+no_second = 1
+no_third = 1
+no_ss = 1
+no_of = 3
+total_players = 10
+
+# could store indexes of all pitchers (or other players) and force (constrain) the sum of binaries at those indexes to equal 2
+# or different value for however many players are at that position
+#array to store indexes of pitchers, catchers, et c.
+
+pitchers = Int64[]
+catchers = Int64[]
+first = Int64[]
+second = Int64[]
+third = Int64[]
+shortStop = Int64[]
+fielders = Int64[]
+
+for i in 1:n
+ if contains(position[i], "P")
+  append!(pitchers, i)
+ end
+ if contains(position[i], "C")
+  append!(catchers, i)
+ end
+ if contains(position[i], "1B")
+  append!(first, i)
+ end
+ if contains(position[i], "2B")
+  append!(second, i)
+ end
+ if contains(position[i], "3B")
+  append!(third, i)
+ end
+ if contains(position[i], "SS")
+  append!(shortStop, i)
+ end
+ if contains(position[i], "OF")
+  append!(fielders, i)
+ end
+end
+
+#println(data)
+
+m = Model(solver = CbcSolver())
+
+#binary variable for whether a player is chosen or not
+@variable(m, x[1:n], Bin)
+
+#constraints must fit line up, eg. two pitchers, one catcher, one 1B etc
+@constraint(m, sum(x[i] for i in pitchers) == no_pitchers)
+@constraint(m, sum(x[i] for i in catchers) == no_catchers)
+@constraint(m, sum(x[i] for i in first) == no_first)
+@constraint(m, sum(x[i] for i in second) == no_second)
+@constraint(m, sum(x[i] for i in third) == no_third)
+@constraint(m, sum(x[i] for i in shortStop) == no_ss)
+@constraint(m, sum(x[i] for i in fielders) == no_of)
+@constraint(m, sum(x[i] for i in 1:n) == total_players)
+
+#total salary must be under 50K
+@constraint(m, sum(x .* salaries) <= salary_cap)
+
+#objective to maximize projected points
+@objective(m, Max, sum(x .* projectedPoints))
+
+solve(m)
+
+x = getvalue(x)
+
+for i in 1:length(x)
+ if x[i] > 0
+  println(names[i] , " " , position[i], " ", salaries[i]," ",projectedPoints[i])
+ end
+end
+
+println(getobjectivevalue(m))
